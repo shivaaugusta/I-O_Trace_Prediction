@@ -8,22 +8,21 @@ import gdown
 # Function to download from Google Drive (direct download)
 # ===============================
 def download_from_drive(file_id, save_path):
-    # Gunakan direct download URL
     url = f"https://drive.google.com/uc?export=download&id={file_id}"
     if not os.path.exists(save_path):
         try:
-            gdown.download(url, save_path, quiet=False)
-            st.write(f"✅ {save_path} berhasil di-download")
+            gdown.download(url, save_path, quiet=False, fuzzy=True)  # pakai fuzzy=True
+            st.success(f"✅ {save_path} berhasil di-download")
         except Exception as e:
             st.error(f"❌ Gagal download {save_path}: {e}")
     else:
-        st.write(f"✅ {save_path} sudah ada, tidak perlu download")
+        st.info(f"ℹ️ {save_path} sudah ada, tidak perlu download ulang")
 
 # ===============================
 # Google Drive File IDs
 # ===============================
-OFFSET_FILE_ID = "1kIY0aOfbmU9efAYmJdX62CXhMdDBYgBW"  # offset_model.pkl
-SIZE_FILE_ID   = "1iTagTMO8Cl0lFhT_EetAatEAcotL-s5R"  # size_model.pkl
+OFFSET_FILE_ID = "1kIY0aOfbmU9efAYmJdX62CXhMdDBYgBW"
+SIZE_FILE_ID   = "1iTagTMO8Cl0lFhT_EetAatEAcotL-s5R"
 
 # ===============================
 # Download kedua model jika belum ada
@@ -34,10 +33,11 @@ download_from_drive(SIZE_FILE_ID, "size_model.pkl")
 # ===============================
 # Load model
 # ===============================
+offset_model, size_model = None, None
 try:
     offset_model = joblib.load("offset_model.pkl")
     size_model = joblib.load("size_model.pkl")
-    st.write("✅ Kedua model berhasil di-load!")
+    st.success("✅ Kedua model berhasil di-load!")
 except Exception as e:
     st.error(f"❌ Gagal load model: {e}")
 
@@ -62,12 +62,18 @@ input_data = pd.DataFrame([{
     "service_class": service_class
 }])
 
-if st.button("Prediksi"):
-    try:
-        pred_offset = offset_model.predict(input_data)[0]
-        pred_size = size_model.predict(input_data)[0]
+st.write("🔎 Input data:")
+st.dataframe(input_data)
 
-        st.success(f"📌 Prediksi Next Offset: {pred_offset:,.0f}")
-        st.success(f"📌 Prediksi Next Size: {pred_size:,.0f} bytes")
-    except Exception as e:
-        st.error(f"❌ Terjadi error saat prediksi: {e}")
+if st.button("Prediksi"):
+    if offset_model is not None and size_model is not None:
+        try:
+            pred_offset = offset_model.predict(input_data)[0]
+            pred_size = size_model.predict(input_data)[0]
+
+            st.success(f"📌 Prediksi Next Offset: {pred_offset:,.0f}")
+            st.success(f"📌 Prediksi Next Size: {pred_size:,.0f} bytes")
+        except Exception as e:
+            st.error(f"❌ Terjadi error saat prediksi: {e}")
+    else:
+        st.error("❌ Model belum berhasil di-load, prediksi tidak bisa dilakukan.")
