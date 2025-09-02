@@ -5,13 +5,12 @@ import os
 import gdown
 
 # ===============================
-# Function to download from Google Drive (direct download)
+# Function to download from Google Drive
 # ===============================
 def download_from_drive(file_id, save_path):
-    url = f"https://drive.google.com/uc?export=download&id={file_id}"
     if not os.path.exists(save_path):
         try:
-            gdown.download(url, save_path, quiet=False, fuzzy=True)  # pakai fuzzy=True
+            gdown.download(id=file_id, output=save_path, quiet=False)  # pakai id langsung
             st.success(f"✅ {save_path} berhasil di-download")
         except Exception as e:
             st.error(f"❌ Gagal download {save_path}: {e}")
@@ -21,25 +20,29 @@ def download_from_drive(file_id, save_path):
 # ===============================
 # Google Drive File IDs
 # ===============================
-OFFSET_FILE_ID = "1kIY0aOfbmU9efAYmJdX62CXhMdDBYgBW"
-SIZE_FILE_ID   = "1iTagTMO8Cl0lFhT_EetAatEAcotL-s5R"
+OFFSET_FILE_ID = "1kIY0aOfbmU9efAYmJdX62CXhMdDBYgBW"  # offset_model.pkl
+SIZE_FILE_ID   = "1iTagTMO8Cl0lFhT_EetAatEAcotL-s5R"  # size_model.pkl
 
 # ===============================
-# Download kedua model jika belum ada
+# Cached loader for models
 # ===============================
-download_from_drive(OFFSET_FILE_ID, "offset_model.pkl")
-download_from_drive(SIZE_FILE_ID, "size_model.pkl")
+@st.cache_resource
+def load_models():
+    download_from_drive(OFFSET_FILE_ID, "offset_model.pkl")
+    download_from_drive(SIZE_FILE_ID, "size_model.pkl")
 
-# ===============================
-# Load model
-# ===============================
-offset_model, size_model = None, None
-try:
-    offset_model = joblib.load("offset_model.pkl")
-    size_model = joblib.load("size_model.pkl")
-    st.success("✅ Kedua model berhasil di-load!")
-except Exception as e:
-    st.error(f"❌ Gagal load model: {e}")
+    try:
+        offset_model = joblib.load("offset_model.pkl")
+        size_model = joblib.load("size_model.pkl")
+        return offset_model, size_model
+    except Exception as e:
+        st.error(f"❌ Gagal load model: {e}")
+        return None, None
+
+offset_model, size_model = load_models()
+
+if offset_model and size_model:
+    st.success("✅ Kedua model berhasil di-load dan dicache!")
 
 # ===============================
 # Streamlit UI
