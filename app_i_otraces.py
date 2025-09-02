@@ -10,7 +10,7 @@ import gdown
 def download_from_drive(file_id, save_path):
     if not os.path.exists(save_path):
         try:
-            gdown.download(id=file_id, output=save_path, quiet=False)  # pakai id langsung
+            gdown.download(id=file_id, output=save_path, quiet=False)
             st.success(f"✅ {save_path} berhasil di-download")
         except Exception as e:
             st.error(f"❌ Gagal download {save_path}: {e}")
@@ -18,22 +18,22 @@ def download_from_drive(file_id, save_path):
         st.info(f"ℹ️ {save_path} sudah ada, tidak perlu download ulang")
 
 # ===============================
-# Google Drive File IDs
+# Google Drive File IDs (NEW MODELS)
 # ===============================
-OFFSET_FILE_ID = "1kIY0aOfbmU9efAYmJdX62CXhMdDBYgBW"  # offset_model.pkl
-SIZE_FILE_ID   = "1iTagTMO8Cl0lFhT_EetAatEAcotL-s5R"  # size_model.pkl
+OFFSET_FILE_ID = "1Rk61lrYRzUnZoTRRA9FSAHzueCRcS4He"  # offset_model_new.pkl
+SIZE_FILE_ID   = "1XuBbA_GmYpDw381NmCG6C2NRifkVS7Ew"  # size_model_new.pkl
 
 # ===============================
 # Cached loader for models
 # ===============================
 @st.cache_resource
 def load_models():
-    download_from_drive(OFFSET_FILE_ID, "offset_model.pkl")
-    download_from_drive(SIZE_FILE_ID, "size_model.pkl")
+    download_from_drive(OFFSET_FILE_ID, "offset_model_new.pkl")
+    download_from_drive(SIZE_FILE_ID, "size_model_new.pkl")
 
     try:
-        offset_model = joblib.load("offset_model.pkl")
-        size_model = joblib.load("size_model.pkl")
+        offset_model = joblib.load("offset_model_new.pkl")
+        size_model = joblib.load("size_model_new.pkl")
         return offset_model, size_model
     except Exception as e:
         st.error(f"❌ Gagal load model: {e}")
