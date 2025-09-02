@@ -2,3 +2,4 @@ streamlit
 pandas
 joblib
 gdown
+scikit-learn
