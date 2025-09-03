@@ -32,27 +32,26 @@ def load_models():
     download_from_drive(SIZE_FILE_ID, "size_model_new.pkl")
 
     try:
-    import joblib
-    # Coba load biasa dulu
-    offset_model = joblib.load("offset_model_new.pkl")
-    size_model   = joblib.load("size_model_new.pkl")
-    return offset_model, size_model
-
-except Exception as e:
-    st.warning(f"⚠️ Gagal load dengan joblib: {e}. Coba fallback pickle...")
-
-    import pickle
-    try:
-        with open("offset_model_new.pkl", "rb") as f1:
-            offset_model = pickle.load(f1, fix_imports=True)
-        with open("size_model_new.pkl", "rb") as f2:
-            size_model = pickle.load(f2, fix_imports=True)
+        import joblib
+        # Coba load biasa dulu
+        offset_model = joblib.load("offset_model_new.pkl")
+        size_model   = joblib.load("size_model_new.pkl")
         return offset_model, size_model
-    except Exception as e2:
-        st.error(f"❌ Gagal load model dengan pickle juga: {e2}")
-        return None, None
 
+    except Exception as e:
+        st.warning(f"⚠️ Gagal load dengan joblib: {e}. Coba fallback pickle...")
 
+        import pickle
+        try:
+            with open("offset_model_new.pkl", "rb") as f1:
+                offset_model = pickle.load(f1, fix_imports=True)
+            with open("size_model_new.pkl", "rb") as f2:
+                size_model = pickle.load(f2, fix_imports=True)
+            return offset_model, size_model
+        except Exception as e2:
+            st.error(f"❌ Gagal load model dengan pickle juga: {e2}")
+            return None, None
+            
 offset_model, size_model = load_models()
 
 if offset_model and size_model:
