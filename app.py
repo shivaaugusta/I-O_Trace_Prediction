@@ -1,20 +1,43 @@
 import streamlit as st
 import pandas as pd
 import joblib
+import os
+import gdown
 
 # ===============================
-# Load Model
+# Google Drive links (ubah ke direct download)
 # ===============================
-try:
-    offset_model = joblib.load(r"C:/Users/User/offset_model_new.pkl")
-    size_model   = joblib.load(r"C:/Users/User/size_model_new.pkl")
-    st.success("✅ Kedua model berhasil di-load!")
-except Exception as e:
-    st.error(f"❌ Gagal load model: {e}")
-    offset_model, size_model = None, None
+OFFSET_URL = "https://drive.google.com/uc?id=1Rk61lrYRzUnZoTRRA9FSAHzueCRcS4He"
+SIZE_URL   = "https://drive.google.com/uc?id=1XuBbA_GmYpDw381NmCG6C2NRifkVS7Ew"
 
 # ===============================
-# Streamlit UI
+# Function to download model if not exist
+# ===============================
+def download_file(url, filename):
+    if not os.path.exists(filename):
+        with st.spinner(f"⬇️ Downloading {filename} ..."):
+            gdown.download(url, filename, quiet=False)
+
+# ===============================
+# Cached model loader
+# ===============================
+@st.cache_resource
+def load_models():
+    download_file(OFFSET_URL, "offset_model_new.pkl")
+    download_file(SIZE_URL, "size_model_new.pkl")
+
+    try:
+        offset_model = joblib.load("offset_model_new.pkl")
+        size_model   = joblib.load("size_model_new.pkl")
+        return offset_model, size_model
+    except Exception as e:
+        st.error(f"❌ Gagal load model: {e}")
+        return None, None
+
+offset_model, size_model = load_models()
+
+# ===============================
+# UI Streamlit
 # ===============================
 st.title("📊 Prediksi Next Offset & Next Size (I/O Traces)")
 
